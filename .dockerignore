@@ -1,0 +1,7 @@
+# The Dockerfile COPYs only ramulator2/, so send only that to the build daemon.
+# Excluding everything else keeps the build context tiny (otherwise podman would
+# tar the whole repo: traces/ ~3GB, .git, the output tar, results/, RTL/, docs/).
+*
+!ramulator2
+ramulator2/build
+**/__pycache__

@@ -1,0 +1,47 @@
+**/__pycache__/
+/traces/
+# Raw sim results, the per-figure CSVs (results/csv/), and the text reports (results/txt/)
+# are all regenerable outputs of parse_results.sh -- reviewers reproduce them from the sweep,
+# so none of results/ is committed.
+/results/
+# Regenerable plot outputs (rebuild with ./plot_all_figures.sh)
+/figures/
+# Container image tar produced by build.sh (regenerable; ~800 MB) — ship, don't track
+/terracotta_artifact.tar
+.vscode-server/
+.dotnet/
+.cache/
+.gnupg/
+.ssh/
+skills/
+
+.vscode/
+
+prada/traces/
+
+*.log
+
+# Generated sensitivity-study job artifacts (regenerable via sens_*setup_sim.py)
+**/sens_*_jobfile*
+**/sens_*_scripts*/
+
+# ROB256-vs-ROB512 bank-occupancy suite (regenerable via rob_suite/launch.sh)
+rob_suite/
+
+# Claude Code worktree scaffolding + instructions (local only)
+.claude/
+CLAUDE.md
+# Local reference material for artifact prep (papers, cloned example artifacts) — never track
+docs/
+# RTL synthesis build logs (regenerable)
+RTL/**/*.log
+# RTL OpenROAD image tars (multi-GB, regenerable via build_hw.sh)
+RTL/*.tar
+# RTL synthesis summary CSVs + scratch (regenerable via the run scripts)
+RTL/synthesis_results.csv
+RTL/terracotta_synthesis_results.csv
+RTL/*_yosys_output.log
+RTL/extract_*.ys
+RTL/*.sbatch
+# RTL synthesis runner output (regenerable)
+RTL/results/
