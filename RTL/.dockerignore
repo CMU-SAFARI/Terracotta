@@ -1,0 +1,15 @@
+# Keep the build context lean: exclude VCS metadata and regenerable flow outputs.
+# (OpenROAD version is passed explicitly to the build, so .git is not needed.)
+**/.git
+**/.github
+OpenROAD-flow-scripts/**/build
+OpenROAD-flow-scripts/docs
+OpenROAD-flow-scripts/flow/designs
+OpenROAD-flow-scripts/flow/tutorials
+OpenROAD-flow-scripts/flow/test
+**/results
+**/logs
+**/reports
+**/*.log
+*.tar
+*.tar.gz

@@ -1,0 +1,91 @@
+# MoPAC-C technique manifest.
+#
+# Declarative description of MoPAC's experiment matrix. Consumed by the shared common/
+# harness. Replaces mopac/common/config.py + setup_sim.py + cgra_setup_sim.py.
+#
+# MoPAC is a PRAC-based RowHammer mitigation. Its controller lives under
+# MemorySystem.BHDRAMController (not Controller), and the mitigation is tuned per RowHammer
+# threshold nRH: each nRH point sets the plugin's abo_threshold and update_probability.
+
+technique: MoPAC-C
+dir: mopac
+frontend: BHO3
+controller_key: BHDRAMController
+baseline_latency: 8
+
+# nRH parameter sweep: for each RowHammer threshold, the tables give the MoPAC plugin
+# parameters (activation-budget threshold and probabilistic update rate). Values from the
+# old config.py: MoPAC_ABO_THRES and MoPAC_UPDATE_P (1/4, 1/8, 1/16).
+sweeps:
+  nRH:
+    points: [250, 500, 1000]
+    tables:
+      mopac_abo:  {250: 80,   500: 176,   1000: 368}
+      mopac_updp: {250: 0.25, 500: 0.125, 1000: 0.0625}
+
+variants:
+  baseline:
+    config: baseline.yaml
+    latency_overhead: 0            # controller_latency 8
+
+  # PRAC-only mitigation baseline. The old script fixes it at the nRH=250 threshold
+  # (PRAC_ABO_THRES[250] = 219) and does not sweep it, so this is a static override.
+  prac:
+    config: prac.yaml
+    latency_overhead: 0            # controller_latency 8
+    params:
+      - path: [MemorySystem, BHDRAMController, plugins, 0, ControllerPlugin, abo_threshold]
+        value: 219
+
+  # Custom MoPAC controller (paper's "MoPAC-C"), swept over nRH.
+  custom:
+    config: mitigation.yaml
+    latency_overhead: 0            # controller_latency 8
+    sweep: nRH
+    sweep_bindings: &mopac_bindings
+      - {path: [MemorySystem, BHDRAMController, plugins, 0, ControllerPlugin, abo_threshold], table: mopac_abo}
+      - {path: [MemorySystem, BHDRAMController, plugins, 0, ControllerPlugin, update_probability], table: mopac_updp}
+
+  # MoPAC on Terracotta (Tables): nRH sweep x the terracotta latency point.
+  terracotta:
+    config: terracotta_mitigation.yaml
+    latency_sweep: [2]            # controller_latency 10
+    sweep: nRH
+    sweep_bindings: *mopac_bindings
+
+  # NOTE: MoPAC has NO Terracotta-CGRA variant -- Fig 16 (CGRA vs Tables vs custom) does not
+  # include a MoPAC panel, so those experiments were dropped from the manifest.
+
+  # Fig 14 (latency sensitivity) ONLY: Terracotta-MoPAC-C over a controller-latency-overhead
+  # sweep, FOUR-CORE (Fig 14's CPU panels are four-core), at the primary RowHammer threshold
+  # nRH=250 (table row: abo_threshold 80, update_probability 0.25). nRH is FIXED (static params,
+  # not swept) so the figure is a clean latency line. Isolated variant -- feeds only Fig 14.
+  terracotta_latency:
+    config: terracotta_mitigation.yaml
+    latency_sweep: [4, 6, 8, 10]   # point 2 (= main terracotta four-core @overhead 2, nRH 250) reused
+    core_setups: [four_core]
+    params:
+      - {path: [MemorySystem, BHDRAMController, plugins, 0, ControllerPlugin, abo_threshold], value: 80}
+      - {path: [MemorySystem, BHDRAMController, plugins, 0, ControllerPlugin, update_probability], value: 0.25}
+
+core_setups:
+  single_core:
+    cores: 1
+    channels: 1
+    mix: ../../common/mixes/single.mix
+  four_core:
+    cores: 4
+    channels: 1
+    mix: ../../common/mixes/four.mix
+
+run:
+  num_expected_insts: 100000000
+  num_max_cycles: 10000000000
+
+figures:
+  # Main MoPAC comparison across nRH (PRAC vs MoPAC vs Terracotta-MoPAC). Paper figure
+  # number to be confirmed in Phase 4.
+  - id: main_mitigation
+    compares: [baseline, prac, custom, terracotta]
+    metric: speedup_over_baseline
+  # NOTE: no figure16 entry -- Fig 16 has no MoPAC panel (see the dropped terracotta_cgra note).

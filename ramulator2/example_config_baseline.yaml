@@ -1,0 +1,45 @@
+Frontend:
+  impl: SimpleO3
+  clock_ratio: 8
+  num_expected_insts: 500000
+  num_max_cycles: 100000000000
+  traces: 
+    - /home/user/Terracotta/ramulator2/sample_traces/401.bzip2
+    # - /home/user/Terracotta/ramulator2/sample_traces/000.empty
+
+  Translation:
+    impl: RandomTranslation
+    max_addr: 2147483648
+              
+
+MemorySystem:
+  impl: GenericDRAM
+  clock_ratio: 3
+
+  DRAM:
+    impl: DDR5
+    org:
+      preset: DDR5_16Gb_x8
+      channel: 1
+      rank: 2
+      channel_width: 64
+    timing:
+      preset: DDR5_3200AN
+    RFM:
+      BRC: 2
+    PRAC: true
+
+  Controller:
+    impl: Generic
+    Scheduler:
+      impl: FRFCFS
+    RefreshManager:
+      impl: AllBank
+
+    RowPolicy:
+      impl: ClosedRowPolicy
+      cap: 4
+    plugins:
+
+  AddrMapper:
+    impl: RoBaRaCoCh

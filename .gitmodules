@@ -1,0 +1,12 @@
+[submodule "RTL/OpenROAD-flow-scripts"]
+	path = RTL/OpenROAD-flow-scripts
+	url = https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.git
+[submodule "cgra/morpher/Morpher_CGRA_Mapper"]
+	path = cgra/morpher/Morpher_CGRA_Mapper
+	url = https://github.com/ecolab-nus/Morpher_CGRA_Mapper.git
+[submodule "cgra/morpher/Morpher_DFG_Generator"]
+	path = cgra/morpher/Morpher_DFG_Generator
+	url = https://github.com/ecolab-nus/Morpher_DFG_Generator.git
+[submodule "cgra/morpher/hycube_simulator"]
+	path = cgra/morpher/hycube_simulator
+	url = https://github.com/ecolab-nus/hycube_simulator.git

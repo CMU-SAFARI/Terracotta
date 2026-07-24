@@ -1,0 +1,10 @@
+# Python packages for the local reproduction path: the run driver (run.py), parsing
+# (parse_results.sh), and plotting (plot_all_figures.sh). Install with:
+#
+#   pip install -r requirements.txt
+#
+# The DRAM sweep itself (ramulator2, a C++ simulator) is built with the system toolchain
+# (cmake + g++ / build_ramulator2_release.sh), not pip.
+matplotlib==3.9.2
+pandas==2.2.2
+pyyaml==6.0.2
