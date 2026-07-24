@@ -1,0 +1,51 @@
+<MutexBB>
+</MutexBB>
+<DFG count="4">
+<Node idx="8" ASAP="0" ALAP="3"BB=".preheader">
+<OP>LOAD</OP>
+<Inputs>
+</Inputs>
+<Outputs>
+        <Output idx="9" nextiter="0" type="I2"/>
+</Outputs>
+<RecParents>
+</RecParents>
+</Node>
+
+<Node idx="13" ASAP="0" ALAP="3"BB=".preheader"CONST="-1">
+<OP>OLOAD</OP>
+<BasePointerName size="4">sa_cur</BasePointerName>
+<Inputs>
+</Inputs>
+<Outputs>
+        <Output idx="9" nextiter="0" type="I1"/>
+</Outputs>
+<RecParents>
+</RecParents>
+</Node>
+
+<Node idx="9" ASAP="1" ALAP="4"BB=".preheader">
+<OP>CMP</OP>
+<Inputs>
+        <Input idx="8"/>
+        <Input idx="13"/>
+</Inputs>
+<Outputs>
+        <Output idx="10" nextiter="0" type="I1"/>
+</Outputs>
+<RecParents>
+</RecParents>
+</Node>
+
+<Node idx="10" ASAP="2" ALAP="5"BB=".preheader"CONST="-1">
+<OP>XOR</OP>
+<Inputs>
+        <Input idx="9"/>
+</Inputs>
+<Outputs>
+</Outputs>
+<RecParents>
+</RecParents>
+</Node>
+
+</DFG>

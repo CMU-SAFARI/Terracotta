@@ -1,0 +1,49 @@
+# Morpher build artifacts
+morpher/Morpher_DFG_Generator/build/
+morpher/Morpher_CGRA_Mapper/build/
+morpher/hycube_simulator/src/build/
+
+# Morpher intermediate/generated files (DFG Generator)
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_triggers/*.dot
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_triggers/*.pdf
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_triggers/*.xml
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_triggers/*.txt
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_triggers/cfg.*
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_triggers/memtraces/
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_updates/*.dot
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_updates/*.pdf
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_updates/*.xml
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_updates/*.txt
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_updates/*.log
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_updates/cfg.*
+morpher/Morpher_DFG_Generator/benchmarks/terracotta_updates/memtraces/
+
+# Morpher intermediate/generated files (CGRA Mapper)
+morpher/Morpher_CGRA_Mapper/json_arch/*_mem*.json
+morpher/Morpher_CGRA_Mapper/benchmarks/hycube/terracotta_triggers/
+morpher/Morpher_CGRA_Mapper/benchmarks/hycube/terracotta_updates/
+
+# LLVM intermediate files
+*.ll
+*.bc
+*.o
+*.s
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/settings.json
+
+# Results (regenerable)
+results/*.log
+results/*.csv

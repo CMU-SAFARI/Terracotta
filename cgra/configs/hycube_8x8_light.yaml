@@ -1,0 +1,15 @@
+# HyCUBE 8x8 light config for testing larger CGRA
+---
+json_arch: "hycube_original_mem8x8.json"
+json_arch_before_memupdate: 'hycube_8x8.json'
+mapper_subfolder: 'hycube'
+dfg_type: 'PartPredLight'
+init_II: 0
+ydim: 8
+xdim: 8
+numberofbanks: 2
+banksize: 2048
+max_test_samples: 5
+mapping_method: 0
+llvm_debug_type: 'no'
+morpher_light: 'yes'

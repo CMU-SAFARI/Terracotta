@@ -1,0 +1,15 @@
+# HyCUBE 6x6 light config
+---
+json_arch: "hycube_original_mem6x6.json"
+json_arch_before_memupdate: 'hycube_6x6.json'
+mapper_subfolder: 'hycube'
+dfg_type: 'PartPredLight'
+init_II: 0
+ydim: 6
+xdim: 6
+numberofbanks: 2
+banksize: 2048
+max_test_samples: 5
+mapping_method: 0
+llvm_debug_type: 'no'
+morpher_light: 'yes'
