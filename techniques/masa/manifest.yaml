@@ -1,0 +1,72 @@
+# MASA technique manifest.
+#
+# Declarative description of MASA's experiment matrix. Consumed by the shared common/
+# harness. Replaces masa/common/config.py + setup_sim.py + cgra_setup_sim.py.
+#
+# "SALP" must never appear: the technique is MASA (the simulator's ISALP -> IMASA rename
+# is already done). The oracle here is MASA with an ideal subarray predictor (DDR5IMASA).
+
+technique: MASA
+dir: masa
+frontend: SimpleO3
+
+baseline_latency: 8
+
+variants:
+  baseline:
+    config: baseline.yaml
+    latency_overhead: 0            # controller_latency 8
+
+  # Custom MASA controller (paper's "MASA").
+  custom:
+    config: masa.yaml
+    latency_overhead: 0            # controller_latency 8
+
+  # Ideal MASA (DDR5IMASA): perfect subarray-selection oracle.
+  oracle:
+    config: oracle.yaml
+    latency_overhead: 0            # controller_latency 8
+
+  # MASA on Terracotta (Tables interface).
+  terracotta:
+    config: terracotta_masa.yaml
+    latency_sweep: [2]            # controller_latency 10
+
+  # MASA on Terracotta-CGRA: baseline + CGRA trigger/update latency (old CGRA_LATENCY 7).
+  terracotta_cgra:
+    config: terracotta_cgra_masa.yaml
+    latency_overhead: 7            # controller_latency 15
+
+  # Fig 14 (latency sensitivity) ONLY: Terracotta-MASA over a controller-latency-overhead
+  # sweep, FOUR-CORE (Fig 14's CPU panels are the four-core weighted speedup). Isolated variant
+  # so these extra points feed only the latency figure -- no other figure references it.
+  terracotta_latency:
+    config: terracotta_masa.yaml
+    latency_sweep: [4, 6, 8, 10]   # point 2 (= main terracotta four-core @overhead 2) is reused
+    core_setups: [four_core]
+
+core_setups:
+  single_core:
+    cores: 1
+    channels: 1
+    mix: ../../common/mixes/single.mix
+  four_core:
+    cores: 4
+    channels: 1
+    mix: ../../common/mixes/four.mix
+
+# Full-run frontend limits (as declared in the config YAMLs). Documentation only in R1;
+# config_gen leaves the YAML limits untouched by default.
+run:
+  num_expected_insts: 100000000
+  num_max_cycles: 10000000000
+
+figures:
+  # Main MASA speedup comparison. Paper figure number to be confirmed in Phase 4.
+  - id: main_speedup
+    compares: [baseline, custom, oracle, terracotta]
+    metric: speedup_over_baseline
+  # Fig. 16 (paper §8.7): Terracotta-CGRA vs Terracotta-Tables vs custom.
+  - id: figure16
+    compares: [custom, terracotta, terracotta_cgra]
+    metric: speedup_over_baseline

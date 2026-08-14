@@ -1,0 +1,90 @@
+# PRADA technique manifest.
+#
+# Declarative description of PRADA's experiment matrix. Consumed by the shared common/
+# harness via the co-located hook.py (PRADA is the one technique with genuinely unique
+# enumeration logic). Replaces prada/common/config.py + setup_sim.py + cgra_setup_sim.py.
+#
+# PRADA is a Processing-using-Memory (PuM) case study. Unlike the other techniques it does
+# NOT sweep workload mixes: it sweeps a fixed set of PuM operations, and for each operation
+# selects a trace by prefix + type (P = PuM trace, B = baseline trace) and sets
+# Frontend.operation. That selection is the hook's job; everything else is generic.
+
+technique: PRADA
+dir: prada
+frontend: PuMO3
+baseline_latency: 8
+
+variants:
+  # Baseline runs the non-PuM (base_*) traces. It participates in both the default (32-bank)
+  # run and the 1-bank run (old cgra_launch.sh block 2), so it is enabled for both setups.
+  baseline:
+    config: baseline.yaml
+    latency_overhead: 0            # controller_latency 8
+    core_setups: [single_core, single_core_1b]
+
+  # Custom PRADA runs the PuM (pum_*) traces at BOTH bank counts -- Fig 9 and Fig 16 compare
+  # custom + Terracotta PRADA at 1 bank and 32 banks.
+  custom:
+    config: prada.yaml
+    latency_overhead: 0            # controller_latency 8
+    core_setups: [single_core, single_core_1b]
+
+  # PRADA on Terracotta (Tables), at BOTH bank counts.
+  terracotta:
+    config: terracotta_prada.yaml
+    latency_sweep: [2]            # controller_latency 10
+    core_setups: [single_core, single_core_1b]
+
+  # PRADA on Terracotta-CGRA: baseline + CGRA latency (old CGRA_LATENCY 4). This is the only
+  # PuM variant the 1-bank run exercises (with baseline), matching old cgra_launch.sh block 2.
+  terracotta_cgra:
+    config: terracotta_cgra_prada.yaml
+    latency_overhead: 4            # controller_latency 12
+    core_setups: [single_core, single_core_1b]
+
+  # Fig 14 (latency sensitivity) ONLY: Terracotta-PRADA PuM over a controller-latency-overhead
+  # sweep (32-bank). Isolated single-core variant -- feeds only the latency figure + parser
+  # (uses the PuM cycle-ratio metric, averaged over operations).
+  terracotta_latency:
+    config: terracotta_prada.yaml
+    latency_sweep: [4, 6, 8, 10]   # point 2 (= main terracotta @overhead 2) is reused, not re-run
+    core_setups: [single_core]
+
+core_setups:
+  # PuM is single-core only (no four-core mix). Two workload sets, differing by how many DRAM
+  # banks the PuM operation is parallelized across ("1b"/"32b" = 1 bank / 32 banks):
+  #   single_core     -> 32-bank PuM run (traces *_32M); all 4 variants
+  #   single_core_1b  -> 1-bank PuM run (traces *_1b); all 4 variants (baseline, custom,
+  #                      terracotta, terracotta_cgra) so Fig 9 / Fig 16 have both bank counts.
+  single_core:
+    cores: 1
+    channels: 1
+    mix: mixes/single.mix
+  single_core_1b:
+    cores: 1
+    channels: 1
+    mix: mixes/single_1b.mix
+
+# PuM configuration consumed by hook.py. Each operation is run once per variant; the trace
+# is chosen by prefix + type. base_variants use the baseline (B) traces, the rest use the
+# PuM (P) traces.
+pum:
+  operations: [andor, nandnor, xorxnor, copy, not]
+  trace_prefix:      {andor: pum_2ip,  nandnor: pum_2ip,  xorxnor: pum_2ip,  copy: pum_1ip,  not: pum_1ip}
+  base_trace_prefix: {andor: base_2ip, nandnor: base_2ip, xorxnor: base_2ip, copy: base_1ip, not: base_1ip}
+  base_variants: [baseline]
+
+run:
+  num_iterations: 8
+
+figures:
+  # Fig. 9: per-operation PuM speedup -- baseline vs PRADA vs Terracotta-PRADA.
+  # PuM speedup is an execution-cycle ratio (baseline CPU cycles / in-DRAM PuM cycles),
+  # NOT an IPC ratio -- see derive.pum_speedup.
+  - id: main_pum
+    compares: [baseline, custom, terracotta]
+    metric: pum_speedup
+  # Fig. 16 (paper §8.7): Terracotta-CGRA vs Terracotta-Tables vs custom.
+  - id: figure16
+    compares: [custom, terracotta, terracotta_cgra]
+    metric: speedup_over_baseline

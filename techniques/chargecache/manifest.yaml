@@ -1,0 +1,82 @@
+# ChargeCache technique manifest.
+#
+# Declarative description of ChargeCache's experiment matrix. Consumed by the shared
+# common/ harness (config_gen, execute, status, parse). Replaces the old
+# chargecache/common/config.py + setup_sim.py + cgra_setup_sim.py.
+
+technique: ChargeCache
+dir: chargecache
+frontend: SimpleO3
+
+# controller_latency written into every generated config = baseline_latency + variant
+# overhead. baseline_latency is the DDR5 controller base latency (old BASELINE_LATENCY).
+baseline_latency: 8
+
+variants:
+  # Unmodified baseline controller.
+  baseline:
+    config: baseline.yaml
+    latency_overhead: 0            # controller_latency 8
+
+  # Custom ChargeCache controller (paper's "ChargeCache").
+  custom:
+    config: chargecache.yaml
+    latency_overhead: 1            # old CC_LATENCY_OVERHEAD -> controller_latency 9
+
+  # Oracle ChargeCache (perfect highly-charged-row predictor). Runs at the baseline
+  # controller latency: an ideal/free predictor adds no ChargeCache lookup overhead.
+  # CORRECTED (2026-07-18): controller_latency = BASELINE_LATENCY (8) for BOTH core setups.
+  # The old setup_sim.py set oracle to 9 for single-core (it lumped oracle with the custom
+  # controller in the +1 branch) but 8 for four-core (oracle omitted there) -- a copy-paste
+  # bug. This intentionally diverges from the old single-core oracle configs; the change is
+  # confined to controller_latency. Oracle results must be regenerated -> paper update task.
+  oracle:
+    config: oracle.yaml
+    latency_overhead: 0            # controller_latency 8 (both core setups)
+
+  # ChargeCache on Terracotta (Tables interface). The old TERRACOTTA_LATENCY sweep had
+  # one point (2); it is appended to the experiment name (terracotta_<workload>_2).
+  terracotta:
+    config: terracotta_chargecache.yaml
+    latency_sweep: [2]            # controller_latency 10
+
+  # ChargeCache on Terracotta-CGRA: baseline + CGRA trigger/update latency.
+  terracotta_cgra:
+    config: terracotta_cgra_chargecache.yaml
+    latency_overhead: 8            # old CGRA_LATENCY -> controller_latency 16
+
+  # Fig 14 (latency sensitivity) ONLY: Terracotta-ChargeCache over a controller-latency-overhead
+  # sweep, FOUR-CORE (Fig 14's CPU panels are the four-core weighted speedup). Isolated variant
+  # so these extra points feed only the latency figure -- no other figure references it.
+  terracotta_latency:
+    config: terracotta_chargecache.yaml
+    latency_sweep: [4, 6, 8, 10]   # point 2 (= main terracotta four-core @overhead 2) is reused
+    core_setups: [four_core]
+
+core_setups:
+  single_core:
+    cores: 1
+    channels: 1
+    mix: ../../common/mixes/single.mix
+  four_core:
+    cores: 4
+    channels: 1
+    mix: ../../common/mixes/four.mix
+
+# Full-run frontend limits (as declared in the config YAMLs). Documentation for now:
+# config_gen leaves the YAML limits untouched by default, so default generation is
+# equivalent to the old scripts. The --num-expected-insts / --num-max-cycles flags override
+# these for ad-hoc short runs.
+run:
+  num_expected_insts: 1000000000
+  num_max_cycles: 10000000000
+
+figures:
+  # Main ChargeCache speedup comparison. Paper figure number to be confirmed in Phase 4.
+  - id: main_speedup
+    compares: [baseline, custom, oracle, terracotta]
+    metric: speedup_over_baseline
+  # Fig. 16 (paper §8.7): Terracotta-CGRA vs Terracotta-Tables vs custom.
+  - id: figure16
+    compares: [custom, terracotta, terracotta_cgra]
+    metric: speedup_over_baseline
