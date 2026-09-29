@@ -1,0 +1,64 @@
+Frontend:
+  impl: SimpleO3
+  clock_ratio: 8
+  num_expected_insts: 100000000
+  num_max_cycles: 10000000000
+  llc_capacity_per_core: 2MB
+  llc_linesize: 64
+  llc_associativity: 16
+  llc_num_mshr_per_core: 16
+  ipc: 4
+  inst_window_depth: 256
+  traces: 
+    - sample_traces/505.mcf
+
+  Translation:
+    impl: RandomTranslation
+    max_addr: 2147483648
+              
+
+MemorySystem:
+  impl: GenericDRAM
+  clock_ratio: 3
+
+  DRAM:
+    impl: DDR5ChargeCacheMASA
+    org:
+      preset: DDR5_16Gb_x8
+      channel: 1
+      rank: 1
+      channel_width: 32
+    timing:
+      preset: DDR5_3200AN
+    RFM:
+      BRC: 2
+    PRAC: true
+    drampower_enable: true
+    voltage:
+      preset: Default
+    current:
+      preset: Default
+
+  Controller:
+    impl: TerracottaChargeCacheMASAController
+    Scheduler:
+      impl: FRFCFS
+    RefreshManager:
+      impl: AllBank
+    RowPolicy:
+      impl: SubarrayClosedRowPolicy
+      cap: 4
+    Config:
+      set_associativity: 2
+      num_entries_per_bank_per_core: 16
+      caching_duration: 1
+      is_debug: false
+    AdaptiveCC:
+      ewma_alpha: 0.125
+      bus_util_threshold: 0.5
+      ewma_window: 1000
+    plugins:
+    controller_latency: 10
+
+  AddrMapper:
+    impl: RoBaRaCoCh
